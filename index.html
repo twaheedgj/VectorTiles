@@ -1,41 +1,74 @@
-<!doctype html><html><head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet"/>
-<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
-<style>html,body,#map{height:100%;margin:0}</style></head><body>
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Test Parcels Vector Tiles</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link
+    href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css"
+    rel="stylesheet"
+  />
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+  <style>
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
 <div id="map"></div>
+
 <script>
+  // Replace with your token or switch to MapLibre for free testing
   mapboxgl.accessToken = "pk.eyJ1IjoidHdhaGVlZDc4MDciLCJhIjoiY21kaXo0c3BwMGU3eTJrcno2bmlnY3NtYSJ9.sr3WDZwdql2M46HUPtUiWw";
-  const API = "http://localhost:5501";
-  const tiles = [`${API}/tile/parcel/by-coords/{z}/{x}/{y}.mvt?lat=32.7767&lon=-96.7970&extent=1024`];
 
   const map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/mapbox/light-v11",
-    center: [-96.7970, 32.7767],
+    center: [-96.7970, 32.7767], // Center on your parcels area
     zoom: 13
   });
 
   map.on("load", () => {
-    map.addSource("parcel_xyz", { type: "vector", tiles, minzoom: 5, maxzoom: 22 });
+    // Add the parcels vector source
+    map.addSource("parcels", {
+      type: "vector",
+      tiles: [
+        "http://localhost:5501/tile/parcel/{z}/{x}/{y}.mvt?extent=4096&limit=20000&buffer=64"
+      ],
+      minzoom: 5,
+      maxzoom: 22
+    });
 
+    // Fill layer for parcels
     map.addLayer({
-      id: "parcel-neighbors",
+      id: "parcels-fill",
       type: "fill",
-      source: "parcel_xyz",
-      "source-layer": "parcels",
-      filter: ["==", ["get","role"], "neighbor"],
-      paint: { "fill-color": "#1e90ff", "fill-opacity": 0.35 }
+      source: "parcels",
+      "source-layer": "parcels", // Must match ST_AsMVT layer name
+      paint: {
+        "fill-color": "#00bfff",
+        "fill-opacity": 0.35
+      }
     });
 
+    // Outline for parcels
     map.addLayer({
-      id: "parcel-target",
+      id: "parcels-outline",
       type: "line",
-      source: "parcel_xyz",
+      source: "parcels",
       "source-layer": "parcels",
-      filter: ["==", ["get","role"], "subject"],
-      paint: { "line-color": "#ff0033", "line-width": 3 }
+      paint: {
+        "line-color": "#004",
+        "line-width": 1
+      }
     });
+
+    // Debug: show XYZ tile boundaries
+    map.showTileBoundaries = true;
   });
 </script>
-</body></html>
+</body>
+</html>

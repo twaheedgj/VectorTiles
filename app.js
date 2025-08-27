@@ -24,7 +24,6 @@ app.get('/', async(req, res) => {
         client.release();
     }
 });
-
 app.listen(PORT, () => {
     console.log(`Tiles API running at port ${PORT} in ${NODE_ENV} mode`)
 });
