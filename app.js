@@ -6,7 +6,7 @@ import pool from './database/postgres.js';
 import  tile_route  from './routes/tiles.routes.js';
 import errorMiddleware from './middleware/error.middleware.js';
 const app = express();
-app.use(cors());
+app.use(cors({ origin: '*', methods: ['GET','OPTIONS'] }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(errorMiddleware);
