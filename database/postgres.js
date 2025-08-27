@@ -1,12 +1,12 @@
 import pkg from 'pg';
 const { Pool } = pkg;
-import {USER,DB_PORT,HOST,DATABASE,PASSWORD} from '../config/env.js';
+import {DB_USER,DB_PORT,DB_HOST,DB_NAME,DB_PASSWORD} from '../config/env.js';
 
 const pool= new Pool({
-    user: USER,
-    host: HOST,
-    database: DATABASE,
-    password: PASSWORD,
+    user: DB_USER,
+    host: DB_HOST,
+    database: DB_NAME,
+    password: DB_PASSWORD,
     port: DB_PORT,
 });
 
