@@ -1,7 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import { PORT ,NODE_ENV } from './config/env.js';
+import { PORT} from './config/env.js';
 import pool from './database/postgres.js';
 import  tile_route  from './routes/tiles.routes.js';
 import errorMiddleware from './middleware/error.middleware.js';
@@ -25,5 +25,5 @@ app.get('/', async(req, res) => {
     }
 });
 app.listen(PORT, () => {
-    console.log(`Tiles API running at port ${PORT} in ${NODE_ENV} mode`)
+    console.log(`Tiles API running at port ${PORT}`)
 });
