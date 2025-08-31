@@ -2,73 +2,174 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Test Parcels Vector Tiles</title>
+  <title>Ponds + Streams MVT Test</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link
-    href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css"
-    rel="stylesheet"
-  />
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet" />
   <script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
   <style>
-    html, body, #map {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
+    html, body, #map { height: 100%; margin: 0; }
+    .mapboxgl-popup-content { font: 12px/1.4 system-ui, sans-serif; }
+    pre { margin: 0; white-space: pre-wrap; }
   </style>
 </head>
 <body>
 <div id="map"></div>
 
 <script>
-  // Replace with your token or switch to MapLibre for free testing
+  // Token
   mapboxgl.accessToken = "pk.eyJ1IjoidHdhaGVlZDc4MDciLCJhIjoiY21kaXo0c3BwMGU3eTJrcno2bmlnY3NtYSJ9.sr3WDZwdql2M46HUPtUiWw";
 
   const map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/mapbox/light-v11",
-    center: [-96.7970, 32.7767], // Center on your parcels area
-    zoom: 13
+    center: [-96.7970, 32.7767],
+    zoom: 11
   });
 
   map.on("load", () => {
-    // Add the parcels vector source
-    map.addSource("parcels", {
+    // Vector sources (same-origin; adjust path if proxied)
+    map.addSource("ponds", {
       type: "vector",
-      tiles: [
-        "http://3.150.16.102/api/vc/tile/parcel/{z}/{x}/{y}.mvt?extent=4096&limit=20000&buffer=64"
-      ],
-      minzoom: 5,
-      maxzoom: 22
+      tiles: ["http://localhost:8009/tile/ponds/{z}/{x}/{y}.mvt?extent=4096&buffer=64&limit=15000"],
+      minzoom: 5, maxzoom: 22
     });
-
-    // Fill layer for parcels
+    map.addSource("streams", {
+      type: "vector",
+      tiles: ["http://localhost:8009/tile/streams/{z}/{x}/{y}.mvt?extent=4096&buffer=64&limit=20000"],
+      minzoom: 5, maxzoom: 22
+    });
+    map.addSource("wetlands", {
+      type: "vector",
+      tiles: ["http://localhost:8009/tile/wetlands/{z}/{x}/{y}.mvt?extent=4096&buffer=64&limit=20000"],
+      minzoom: 5, maxzoom: 22
+    });
+    map.addSource("water-bodies", {
+      type: "vector",
+      tiles: ["http://localhost:8009/tile/water-bodies/{z}/{x}/{y}.mvt?extent=4096&buffer=64&limit=20000"],
+      minzoom: 5, maxzoom: 22
+    });
+    map.addSource("sea-ocean", {
+      type: "vector",
+      tiles: ["http://localhost:8009/tile/sea-ocean/{z}/{x}/{y}.mvt?extent=4096&buffer=64&limit=20000"],
+      minzoom: 5, maxzoom: 22
+    });
+    // Ponds
     map.addLayer({
-      id: "parcels-fill",
+      id: "ponds-fill",
       type: "fill",
-      source: "parcels",
-      "source-layer": "parcels", // Must match ST_AsMVT layer name
-      paint: {
-        "fill-color": "#00bfff",
-        "fill-opacity": 0.35
-      }
+      source: "ponds",
+      "source-layer": "ponds",
+      paint: { "fill-color": "#3B8BEB", "fill-opacity": 0.45 }
     });
-
-    // Outline for parcels
     map.addLayer({
-      id: "parcels-outline",
+      id: "ponds-outline",
       type: "line",
-      source: "parcels",
-      "source-layer": "parcels",
-      paint: {
-        "line-color": "#004",
-        "line-width": 1
-      }
+      source: "ponds",
+      "source-layer": "ponds",
+      paint: { "line-color": "#0b2545", "line-width": 0.8 }
     });
 
-    // Debug: show XYZ tile boundaries
-    map.showTileBoundaries = true;
+    // Streams
+    map.addLayer({
+      id: "streams-line",
+      type: "line",
+      source: "streams",
+      "source-layer": "streams",
+      layout: { "line-join": "round", "line-cap": "round" },
+      paint: {
+        "line-color": [
+          "match", ["get","ftype"],
+          460, "#0077b6",  
+          558, "#0077b6",
+          /* default */ "#22577A"
+        ],
+        "line-width": [
+          "interpolate", ["linear"], ["zoom"],
+          8, 0.3,
+          12, 0.9,
+          14, 1.5
+        ]
+      }
+    });
+    map.addLayer({
+      id: "wetlands-fill",
+      type: "fill",
+      source: "wetlands",
+      "source-layer": "wetlands",
+      paint: { "fill-color": "#2a9d8f", "fill-opacity": 0.45 }
+    });
+    map.addLayer({
+      id: "wetlands-outline",
+      type: "line",
+      source: "wetlands",
+      "source-layer": "wetlands",
+      paint: { "line-color": "#264653", "line-width": 0.8 }
+    });
+    map.addLayer({
+      id: "water-bodies-fill",
+      type: "fill",
+      source: "water-bodies",
+      "source-layer": "water_bodies",
+      paint: { "fill-color": "#457b9d", "fill-opacity": 0.45 }
+    });
+    map.addLayer({
+      id: "water-bodies-outline",
+      type: "line",
+      source: "water-bodies",
+      "source-layer": "water_bodies",
+      paint: { "line-color": "#1d3557", "line-width": 0.8 }
+    });
+    map.addLayer({
+      id: "sea-ocean-fill",
+      type: "fill",
+      source: "sea-ocean",
+      "source-layer": "sea_ocean",
+      paint: { "fill-color": "#1d3557", "fill-opacity": 0.45 }
+    });
+    map.addLayer({
+      id: "sea-ocean-outline",
+      type: "line",
+      source: "sea-ocean",
+      "source-layer": "sea_ocean",
+      paint: { "line-color": "#1d3557", "line-width": 0.8 }
+    });
+    // Interactions
+    map.on("mousemove", "ponds-fill", () => map.getCanvas().style.cursor = "pointer");
+    map.on("mouseleave", "ponds-fill", () => map.getCanvas().style.cursor = "");
+    map.on("mousemove", "streams-line", () => map.getCanvas().style.cursor = "pointer");
+    map.on("mouseleave", "streams-line", () => map.getCanvas().style.cursor = "");
+    map.on("mousemove", "wetlands-fill", () => map.getCanvas().style.cursor = "pointer");
+    map.on("mouseleave", "wetlands-fill", () => map.getCanvas().style.cursor = "");
+    map.on("mousemove", "water-bodies-fill", () => map.getCanvas().style.cursor = "pointer");
+    map.on("mouseleave", "water-bodies-fill", () => map.getCanvas().style.cursor = "");
+    map.on("mousemove", "sea-ocean-fill", () => map.getCanvas().style.cursor = "pointer");
+    map.on("mouseleave", "sea-ocean-fill", () => map.getCanvas().style.cursor = "");
+    map.on("click", "ponds-fill", (e) => {
+      const p = e.features?.[0]?.properties || {};
+      new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML(
+          `<strong>${p.gnis_name || "Pond"}</strong><br><pre>${JSON.stringify({
+            objectid: p.objectid, areasqkm: p.areasqkm, elevation: p.elevation,
+            ftype: p.ftype, fcode: p.fcode
+          }, null, 2)}</pre>`
+        ).addTo(map);
+    });
+
+    map.on("click", "streams-line", (e) => {
+      const p = e.features?.[0]?.properties || {};
+      new mapboxgl.Popup()
+        .setLngLat(e.lngLat)
+        .setHTML(
+          `<strong>${p.gnis_name || "Stream"}</strong><br><pre>${JSON.stringify({
+            objectid: p.objectid, lengthkm: p.lengthkm, flowdir: p.flowdir,
+            ftype: p.ftype, fcode: p.fcode
+          }, null, 2)}</pre>`
+        ).addTo(map);
+    });
   });
+
+  map.on("error", (e) => console.error(e.error || e));
 </script>
 </body>
 </html>
